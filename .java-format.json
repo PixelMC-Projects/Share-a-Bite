@@ -1,0 +1,6 @@
+{
+  "tool": "google-java-format",
+  "version": "1.24.0",
+  "style": "AOSP",
+  "indent": 4
+}

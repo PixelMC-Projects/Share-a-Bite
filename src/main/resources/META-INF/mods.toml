@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="${mod_license}"
+issueTrackerURL="https://github.com/PixelMC-Projects/Share-a-Bite/issues"
+
+[[mods]]
+modId="shareabite"
+version="${mod_version}"
+displayName="Share a Bite"
+displayURL="https://github.com/PixelMC-Projects/Share-a-Bite"
+authors="zcpu, PixelMC"
+description='''Standalone hold-to-feed player interaction with recipient permissions, live anti-grief feeding notices, native eating feedback, and automatic food-progression compatibility.'''
+
+[[dependencies.shareabite]]
+modId="forge"
+mandatory=true
+versionRange="[47.3.33,48)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.shareabite]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.1]"
+ordering="NONE"
+side="BOTH"

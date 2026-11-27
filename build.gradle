@@ -1,0 +1,87 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.aliyun.com/repository/public' }
+        maven { url = 'https://maven.minecraftforge.net/' }
+        mavenCentral()
+    }
+    dependencies { classpath 'net.minecraftforge.gradle:ForgeGradle:6.0.54' }
+}
+apply plugin: 'net.minecraftforge.gradle'
+
+version = mod_version
+group = 'cn.pixelmc.shareabite'
+base { archivesName = 'share-a-bite-forge-1.20.1' }
+java { toolchain { languageVersion = JavaLanguageVersion.of(17) } }
+
+sourceSets {
+    logicChecks {
+        java.srcDir 'src/logicChecks/java'
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'info'
+            mods { shareabite { source sourceSets.main } }
+        }
+        client {}
+        server { args '--nogui' }
+    }
+}
+
+repositories {
+    maven { name = 'AliyunPublic'; url = 'https://maven.aliyun.com/repository/public' }
+    maven { name = 'BMCLAPIForge'; url = 'https://bmclapi2.bangbang93.com/maven' }
+}
+repositories.configureEach { repo ->
+    if (repo instanceof MavenArtifactRepository) {
+        def host = repo.url.host
+        if (host == 'maven.minecraftforge.net' || host == 'libraries.minecraft.net')
+            repo.url = 'https://bmclapi2.bangbang93.com/maven'
+        if (host == 'repo.maven.apache.org' || host == 'repo1.maven.org')
+            repo.url = 'https://maven.aliyun.com/repository/public'
+    }
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.33'
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    def props = [
+        mod_version: mod_version,
+        mod_license: mod_license,
+    ]
+    inputs.properties props
+    filesMatching('META-INF/mods.toml') {
+        expand props
+    }
+}
+
+tasks.register('logicTest', JavaExec) {
+    dependsOn 'logicChecksClasses'
+    classpath = sourceSets.logicChecks.runtimeClasspath
+    mainClass = 'cn.pixelmc.shareabite.ShareABiteLogicChecks'
+}
+tasks.named('check').configure { dependsOn 'logicTest' }
+
+tasks.named('jar', Jar).configure {
+    manifest { attributes(['Implementation-Version': project.version]) }
+    finalizedBy 'reobfJar'
+}
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+tasks.withType(net.minecraftforge.gradle.common.tasks.DownloadAssets).configureEach {
+    assetRepository = 'https://bmclapi2.bangbang93.com/assets/'
+}
+
+// Preserve Apache-2.0 license and author attribution in every published JAR.
+tasks.withType(Jar).configureEach {
+    from(rootProject.file('LICENSE')) { into 'META-INF/pixelmc' }
+    from(rootProject.file('NOTICE')) { into 'META-INF/pixelmc' }
+}
